@@ -1,8 +1,13 @@
 'use strict';
 
-let center, buttonSize;
+import bluetooth from './bluetooth';
+import spaceshipGame from './spaceship';
+
+let center, buttonSize, canvasObj;
+const openingState = spaceshipGame;
 
 function draw(ctx, canvas) {
+  canvasObj = canvas;
   center = {x: canvas.width/2, y: canvas.height/2};
   buttonSize = {width: canvas.width/2, height: canvas.height/2};
   // Background
@@ -16,7 +21,7 @@ function draw(ctx, canvas) {
   drawConnectText(ctx, canvas);
 
   // Listen to mouse clicks on the button
-  canvas.addEventListener('click', connect);
+  canvas.addEventListener('click', openNextState);
 }
 
 
@@ -44,14 +49,23 @@ function drawConnectText(ctx, canvas) {
 }
 
 
-function connect(e) {
+function openNextState(e) {
   if (e.offsetX >= center.x-(buttonSize.width/2) &&
       e.offsetX <= center.x-(buttonSize.width/2) + buttonSize.width &&
       e.offsetY >= center.y-(buttonSize.height/2) &&
       e.offsetY <= center.y-(buttonSize.height/2) + buttonSize.height) {
-        console.log("Ouch");
-      }
+        //Request phone permission and open the game
+        const service = bluetooth.requestService();
+        service.then(service => {
+          // In case the player canceled the pairing dialog, do nothing
+          if (service) {
+            canvasObj.removeEventListener('click', openNextState);
+            openingState.draw(service);
+          }
+        });
+  }
 }
+
 
 export default {
   draw,
