@@ -1,20 +1,56 @@
 'use strict';
 
-function draw(ctx) {
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
+let center, buttonSize;
 
+function draw(ctx, canvas) {
+  center = {x: canvas.width/2, y: canvas.height/2};
+  buttonSize = {width: canvas.width/2, height: canvas.height/2};
+  // Background
   ctx.fillStyle = "rgb(146, 31, 147)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const buttonSize = {width: 200, height: 200};
+  // Connect Button
+  drawConnectButton(ctx, canvas);
 
-  const center = {x: canvas.width/2, y: canvas.height/2};
+  // Connect text
+  drawConnectText(ctx, canvas);
+
+  // Listen to mouse clicks on the button
+  canvas.addEventListener('click', connect);
+}
+
+
+function drawConnectButton(ctx, canvas) {
   ctx.translate(center.x, center.y);
+  ctx.save();
 
   ctx.fillStyle = "rgb(30, 186, 255)";
-  ctx.fillRect(center.x-(buttonSize.width/2), center.y-(buttonSize.height/2));
+  ctx.shadowOffsetX = 8;
+  ctx.shadowOffsetY = 8;
+  ctx.shadowBlur = 5;
+  ctx.shadowColor = "rgb(46, 47, 48)";
 
+  ctx.fillRect(-(buttonSize.width/2), -(buttonSize.height/2),
+               buttonSize.width, buttonSize.height);
+}
+
+
+function drawConnectText(ctx, canvas) {
+  ctx.restore();
+  ctx.font = "50px Helvetica";
+  const connectText = "CONNECT";
+  const textProps = ctx.measureText(connectText);
+  ctx.fillText(connectText, -(textProps.width/2), 0);
+}
+
+
+function connect(e) {
+  if (e.offsetX >= center.x-(buttonSize.width/2) &&
+      e.offsetX <= center.x-(buttonSize.width/2) + buttonSize.width &&
+      e.offsetY >= center.y-(buttonSize.height/2) &&
+      e.offsetY <= center.y-(buttonSize.height/2) + buttonSize.height) {
+        console.log("Ouch");
+      }
 }
 
 export default {

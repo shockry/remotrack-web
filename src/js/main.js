@@ -1,3 +1,7 @@
 'use strict';
 import connectionState from './connection';
-connectionState.draw();
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+connectionState.draw(ctx, canvas);
