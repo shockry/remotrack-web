@@ -1,0 +1,18 @@
+{
+  "name": "remotrack",
+  "version": "1.0.0",
+  "description": "Remote-controlled games",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "game",
+    "bluetooth"
+  ],
+  "author": "Shockry",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "rollup": "^0.38.0"
+  }
+}
