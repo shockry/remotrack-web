@@ -3,13 +3,18 @@
 import bluetooth from './bluetooth';
 import spaceshipGame from './spaceship';
 
-let center, buttonSize, canvasObj;
+export const canvas = document.getElementById('game');
+export const ctx = canvas.getContext('2d');
+
+export let center;
+let buttonSize;
 const openingState = spaceshipGame;
 
-function draw(ctx, canvas) {
-  canvasObj = canvas;
+export function draw() {
   center = {x: canvas.width/2, y: canvas.height/2};
   buttonSize = {width: canvas.width/2, height: canvas.height/2};
+  ctx.save();
+
   // Background
   ctx.fillStyle = "rgb(146, 31, 147)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -59,14 +64,11 @@ function openNextState(e) {
         service.then(service => {
           // In case the player canceled the pairing dialog, do nothing
           if (service) {
-            canvasObj.removeEventListener('click', openNextState);
+            canvas.removeEventListener('click', openNextState);
+            // Clean up, revert the translation to center to start over
+            ctx.restore();
             openingState.draw(service);
           }
         });
   }
-}
-
-
-export default {
-  draw,
 }

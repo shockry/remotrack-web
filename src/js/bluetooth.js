@@ -12,17 +12,6 @@ function requestService() {
     .then(service => {
         return service;
       })
-    // return service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b');
-    // })
-    // .then(characteristic => {
-    //   const koko = characteristic;
-    //   return characteristic.startNotifications().then(_ => {
-    //     console.log("koko will notify you")
-    //     koko.addEventListener('characteristicvaluechanged',
-    //                                     beginWrite);
-    //   });
-    // })
-
     .catch(error => { console.log(error); });
 
 }
