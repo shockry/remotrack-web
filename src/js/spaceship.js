@@ -8,6 +8,7 @@ class SpaceShip {
     this.size = size;
     this.colors = colors;
     this.position = position;
+    this.dimensions = {width: 3*size, height: size+(size/2)+(size/4)};
   }
 
   draw() {
@@ -92,7 +93,7 @@ export function draw(service) {
                                bottom: "rgb(0, 50, 200)"
                              });
 
-  enemy = new EnemyShip(30, {x: center.x+100, y: center.y}, 5, {
+  enemy = new EnemyShip(30, {x: canvas.width, y: center.y+30}, 5, {
                                main: "rgb(200, 100, 0)",
                                middle: "rgb(200, 20, 0)",
                                bottom: "rgb(200, 50, 0)"
@@ -119,4 +120,22 @@ function drawScene() {
   enemy.draw();
 
   window.requestAnimationFrame(drawScene);
+}
+
+function enemyCollides() {
+  return (
+          enemy.position.x-(enemy.dimensions.width/2) <=
+          player.position.x+(player.dimensions.width/2) && (
+          (enemy.position.y+(enemy.dimensions.height-enemy.size) >=
+          player.position.y-player.size &&
+          enemy.position.y+(enemy.dimensions.height-enemy.size) <=
+          player.position.y+(player.dimensions.height-player.size)
+        ) || (
+          (player.position.y+(player.dimensions.height-player.size) >=
+          enemy.position.y-enemy.size &&
+          player.position.y+(player.dimensions.height-player.size) <=
+          enemy.position.y+(enemy.dimensions.height-enemy.size))
+          )
+        )
+        );
 }
