@@ -58,15 +58,17 @@ function openNextState(e) {
       e.offsetY >= center.y-(buttonSize.height/2) &&
       e.offsetY <= center.y-(buttonSize.height/2) + buttonSize.height) {
         //Request phone permission and open the game
-        const service = bluetooth.requestService();
-        service.then(service => {
-          // In case the player canceled the pairing dialog, do nothing
-          if (service) {
-            canvas.removeEventListener('click', openNextState);
-            // Clean up, revert the translation to center to start over
-            ctx.restore();
-            openingStateDraw(service);
-          }
-        });
+        // const service = bluetooth.requestService();
+        // service.then(service => {
+        //   // In case the player canceled the pairing dialog, do nothing
+        //   if (service) {
+        //     canvas.removeEventListener('click', openNextState);
+        //     // Clean up, revert the translation to center to start over
+        //     ctx.restore();
+        //     openingStateDraw(service);
+        //   }
+        // });
+        ctx.restore();
+        openingStateDraw();
   }
 }

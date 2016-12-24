@@ -2,19 +2,102 @@
 
 import {center, ctx, canvas} from './init';
 
-let tiltAngle;
+
+class SpaceShip {
+  constructor(size, position, colors) {
+    this.size = size;
+    this.colors = colors;
+    this.position = position;
+  }
+
+  draw() {
+    ctx.save();
+
+    ctx.fillStyle = this.colors.main;
+    ctx.beginPath();
+    ctx.arc(this.position.x, this.position.y, this.size, 0, Math.PI, true);
+    ctx.fill();
+
+    ctx.fillStyle = this.colors.bottom;
+    ctx.beginPath();
+    ctx.arc(this.position.x, this.position.y+(this.size/4), this.size/2, 0, Math.PI, false);
+    ctx.fill();
+
+    ctx.fillStyle = this.colors.middle;
+    ctx.beginPath();
+    ctx.moveTo(this.position.x+(this.size), this.position.y);
+    ctx.lineTo(this.position.x+((this.size)+(this.size/2)), this.position.y+(this.size/2));
+    ctx.lineTo(this.position.x-((this.size)+(this.size/2)), this.position.y+(this.size/2));
+    ctx.lineTo(this.position.x-this.size, this.position.y);
+    ctx.fill();
+
+    ctx.restore();
+  }
+}
+
+class EnemyShip extends SpaceShip {
+  constructor(size, position, speed, colors) {
+    super(size, position, colors);
+    this.speed = speed;
+    this.bulletPosition = {x: this.position.x, y: this.position.y};
+    this.shot = false;
+  }
+
+  draw() {
+    super.draw();
+    this.position.x -= this.speed;
+
+    this.shoot();
+
+    this.bulletPosition.x -= this.speed*2;
+
+    if (this.position.y < center.y) {
+      this.bulletPosition.y += this.speed/2;
+    } else {
+      this.bulletPosition.y -= this.speed/2;
+    }
+
+    if (this.position.x < -this.size*2) {
+      this.position.x = canvas.width;
+      this.position.y = Math.floor(Math.random()*(canvas.height-this.size*4))+this.size*2;
+      this.bulletPosition = Object.assign({}, this.position);
+    }
+  }
+
+  shoot() {
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(this.bulletPosition.x, this.bulletPosition.y, this.size/4, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+let tiltAngle, player, enemy;
+
 export function draw(service) {
   //Get tilting characteristic, draw the game and listen to changes in angle
-  service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b')
-  .then(characteristic => {
-    const tiltChar = characteristic;
-    return characteristic.startNotifications().then(_ => {
-      tiltChar.addEventListener('characteristicvaluechanged',
-                                      updateAgle);
-      drawScene();
-    });
-  })
-  .catch(error => { console.log(error); });
+  // service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b')
+  // .then(characteristic => {
+  //   const tiltChar = characteristic;
+  //   return characteristic.startNotifications().then(_ => {
+  //     tiltChar.addEventListener('characteristicvaluechanged',
+  //                                     updateAgle);
+  //     drawScene();
+  //   });
+  // })
+  // .catch(error => { console.log(error); });
+  player = new SpaceShip(40, {x: 90, y:center.y}, {
+                               main: "rgb(0, 100, 200)",
+                               middle: "rgb(0, 20, 200)",
+                               bottom: "rgb(0, 50, 200)"
+                             });
+
+  enemy = new EnemyShip(30, {x: center.x+100, y: center.y}, 5, {
+                               main: "rgb(200, 100, 0)",
+                               middle: "rgb(200, 20, 0)",
+                               bottom: "rgb(200, 50, 0)"
+                             });
+  drawScene();
 }
 
 
@@ -32,53 +115,8 @@ function drawScene() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.save();
 
-  spaceShip.draw();
-
-  poleThingy.draw(false);
+  player.draw();
+  enemy.draw();
 
   window.requestAnimationFrame(drawScene);
 }
-
-const spaceShip = {
-  size: 40,
-  draw() {
-    ctx.fillStyle = "rgb(0, 100, 200)";
-    ctx.beginPath();
-    ctx.arc(center.x, center.y, spaceShip.size, 0, Math.PI, true);
-    ctx.fill();
-
-    ctx.fillStyle = "rgb(0, 50, 200)";
-    ctx.beginPath();
-    ctx.arc(center.x, center.y+(spaceShip.size/4), spaceShip.size/2, 0, Math.PI, false);
-    ctx.fill();
-
-    ctx.fillStyle = "rgb(0, 20, 200)";
-    ctx.beginPath();
-    ctx.moveTo(center.x+(spaceShip.size), center.y);
-    ctx.lineTo(center.x+((spaceShip.size)+(spaceShip.size/2)), center.y+(spaceShip.size/2));
-    ctx.lineTo(center.x-((spaceShip.size)+(spaceShip.size/2)), center.y+(spaceShip.size/2));
-    ctx.lineTo(center.x-spaceShip.size, center.y);
-    ctx.fill();
-  }
-};
-
-const poleThingy = {
-  positionX: 0,
-  velocity: -2,
-  size: {width: 20, height: 50},
-  draw(sky=true) {
-    if (sky === true) {
-      ctx.fillRect(this.positionX+=this.velocity, 0,
-                   this.size.width, this.size.height);
-      if (this.positionX < 0) {
-        this.positionX = canvas.width+20;
-      }
-    } else {
-      ctx.fillRect(this.positionX+=this.velocity, canvas.height-this.size.height,
-                   this.size.width, this.size.height);
-      if (this.positionX < 0) {
-        this.positionX = canvas.width+20;
-      }
-    }
-  },
-};
