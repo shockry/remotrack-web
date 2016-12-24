@@ -41,7 +41,7 @@ class EnemyShip extends SpaceShip {
     super(size, position, colors);
     this.speed = speed;
     this.bulletPosition = {x: this.position.x, y: this.position.y};
-    this.shot = false;
+    this.bulletSize = this.size/4;
   }
 
   draw() {
@@ -68,7 +68,7 @@ class EnemyShip extends SpaceShip {
   shoot() {
     ctx.fillStyle = "red";
     ctx.beginPath();
-    ctx.arc(this.bulletPosition.x, this.bulletPosition.y, this.size/4, 0, Math.PI*2);
+    ctx.arc(this.bulletPosition.x, this.bulletPosition.y, this.bulletSize, 0, Math.PI*2);
     ctx.fill();
   }
 }
@@ -125,21 +125,42 @@ function drawScene() {
 function enemyCollides() {
   // Three-way collision detection (top, bottom and front)
   const enemyLeft = enemy.position.x-(enemy.dimensions.width/2);
-  const playerRight = player.position.x+(player.dimensions.width/2);
   const enemyBottom = enemy.position.y+(enemy.dimensions.height-enemy.size);
-  const playerTop = player.position.y-player.size;
-  const playerBottom = player.position.y+(player.dimensions.height-player.size);
   const enemyTop = enemy.position.y-enemy.size;
+
+  const playerRight = player.position.x+(player.dimensions.width/2);
+  const playerBottom = player.position.y+(player.dimensions.height-player.size);
+  const playerTop = player.position.y-player.size;
+
+  const bulletLeft = enemy.bulletPosition.x - enemy.bulletSize;
+  const bulletBottom = enemy.bulletPosition.y + enemy.bulletSize;
+  const bulletTop = enemy.bulletPosition.y - enemy.bulletSize;
+
   return (
-          enemyLeft <= playerRight &&
+          ( // Check for enemy ship collision
+            enemyLeft <= playerRight &&
+            (
+              (
+                enemyBottom >= playerTop &&
+                enemyBottom <= playerBottom
+              ) ||
+              (
+                playerBottom >= enemyTop &&
+                playerBottom <= enemyBottom
+              )
+            )
+          ) || // Check for bullet collision
           (
+            bulletLeft <= playerRight &&
             (
-              enemyBottom >= playerTop &&
-              enemyBottom <= playerBottom
-            ) ||
-            (
-              playerBottom >= enemyTop &&
-              playerBottom <= enemyBottom
+              (
+                bulletBottom >= playerTop &&
+                bulletBottom <= playerBottom
+              ) ||
+              (
+                playerBottom >= bulletTop &&
+                playerBottom <= bulletBottom
+              )
             )
           )
          );
