@@ -59,8 +59,10 @@ class EnemyShip extends SpaceShip {
     }
 
     if (this.position.x < -this.size*2) {
+      score++;
       this.position.x = canvas.width;
       this.position.y = Math.floor(Math.random()*(canvas.height-this.size*4))+this.size*2;
+      this.speed = Math.floor(Math.random()*7)+2;
       this.bulletPosition = Object.assign({}, this.position);
     }
   }
@@ -73,7 +75,7 @@ class EnemyShip extends SpaceShip {
   }
 }
 
-let tiltAngle, player, enemy;
+let tiltAngle, player, enemy, score=0;
 
 export function draw(service) {
   //Get tilting characteristic, draw the game and listen to changes in angle
@@ -114,12 +116,45 @@ function drawScene() {
   // Blue background
   ctx.fillStyle = "rgb(0,204,255)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   ctx.save();
+  // Score
+  ctx.fillStyle = "rgb(0,0,102)";
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  ctx.shadowBlur = 5;
+  ctx.shadowColor = "rgb(46, 47, 48)";
+  ctx.font = "40px Helvetica";
+  const scoreText = score;
+  const textProps = ctx.measureText(scoreText);
+  ctx.fillText(scoreText, canvas.width-(textProps.width)-10, 60);
+
+  ctx.restore();
 
   player.draw();
   enemy.draw();
+  if (!enemyCollides()) {
+    window.requestAnimationFrame(drawScene);
+  } else {
+    drawLoss();
+  }
+}
 
-  window.requestAnimationFrame(drawScene);
+function drawLoss() {
+  ctx.save();
+  ctx.fillStyle = "rgba(0,100,255, 0.6)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "rgb(0,0,102)";
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+  ctx.shadowBlur = 5;
+  ctx.shadowColor = "rgb(46, 47, 48)";
+  ctx.font = "40px Helvetica";
+  const lossText = `You scored \n ${score}`;
+  const textProps = ctx.measureText(lossText);
+  ctx.fillText(lossText, center.x-(textProps.width/2), center.y);
+
+  ctx.restore();
 }
 
 function enemyCollides() {
