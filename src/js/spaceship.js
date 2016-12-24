@@ -78,17 +78,6 @@ class EnemyShip extends SpaceShip {
 let tiltAngle, player, enemy, score=0;
 
 export function draw(service) {
-  //Get tilting characteristic, draw the game and listen to changes in angle
-  // service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b')
-  // .then(characteristic => {
-  //   const tiltChar = characteristic;
-  //   return characteristic.startNotifications().then(_ => {
-  //     tiltChar.addEventListener('characteristicvaluechanged',
-  //                                     updateAgle);
-  //     drawScene();
-  //   });
-  // })
-  // .catch(error => { console.log(error); });
   player = new SpaceShip(40, {x: 90, y:center.y}, {
                                main: "rgb(0, 100, 200)",
                                middle: "rgb(0, 20, 200)",
@@ -100,7 +89,19 @@ export function draw(service) {
                                middle: "rgb(200, 20, 0)",
                                bottom: "rgb(200, 50, 0)"
                              });
-  drawScene();
+  //Get tilting characteristic, draw the game and listen to changes in angle
+  service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b')
+  .then(characteristic => {
+    const tiltChar = characteristic;
+    return characteristic.startNotifications().then(_ => {
+      tiltChar.addEventListener('characteristicvaluechanged',
+                                      updateAgle);
+      drawScene();
+    });
+  })
+  .catch(error => { console.log(error); });
+
+  // drawScene();
 }
 
 

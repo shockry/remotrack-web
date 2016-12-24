@@ -13,22 +13,17 @@ export function draw() {
   buttonSize = {width: canvas.width/2, height: canvas.height/2};
   ctx.save();
 
-  // Background
-  ctx.fillStyle = "rgb(146, 31, 147)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Connect Button
-  drawConnectButton(ctx, canvas);
-
-  // Connect text
-  drawConnectText(ctx, canvas);
+  drawConnectButton();
 
   // Listen to mouse clicks on the button
-  canvas.addEventListener('click', openNextState);
+  canvas.addEventListener('mousedown', animateButton);
+  canvas.addEventListener('mouseup', openNextState);
 }
 
 
-function drawConnectButton(ctx, canvas) {
+function drawConnectButton() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground();
   ctx.translate(center.x, center.y);
   ctx.save();
 
@@ -40,35 +35,64 @@ function drawConnectButton(ctx, canvas) {
 
   ctx.fillRect(-(buttonSize.width/2), -(buttonSize.height/2),
                buttonSize.width, buttonSize.height);
+  ctx.restore();
+  drawConnectText(ctx, canvas);
 }
 
 
-function drawConnectText(ctx, canvas) {
-  ctx.restore();
+function drawBackground() {
+  ctx.fillStyle = "rgb(146, 31, 147)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawConnectText(ctx, canvas, clicked=false) {
   ctx.font = "50px Helvetica";
   const connectText = "CONNECT";
   const textProps = ctx.measureText(connectText);
-  ctx.fillText(connectText, -(textProps.width/2), 0);
+  if (clicked === true) {
+    ctx.fillText(connectText, -(textProps.width/2)+3, 3);
+  } else {
+    ctx.fillText(connectText, -(textProps.width/2), 0);
+  }
 }
 
+function animateButton() {
+  ctx.restore();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  drawBackground();
+  ctx.translate(center.x, center.y);
+  ctx.save();
+  ctx.fillStyle = "rgb(30, 186, 255)";
+  ctx.shadowOffsetX = 5;
+  ctx.shadowOffsetY = 5;
+  ctx.shadowBlur = 5;
+  ctx.shadowColor = "rgb(46, 47, 48)";
+
+  ctx.fillRect(-(buttonSize.width/2)+3, -(buttonSize.height/2)+3,
+               buttonSize.width, buttonSize.height);
+  ctx.restore();
+  drawConnectText(ctx, canvas, true);
+}
 
 function openNextState(e) {
   if (e.offsetX >= center.x-(buttonSize.width/2) &&
       e.offsetX <= center.x-(buttonSize.width/2) + buttonSize.width &&
       e.offsetY >= center.y-(buttonSize.height/2) &&
       e.offsetY <= center.y-(buttonSize.height/2) + buttonSize.height) {
-        //Request phone permission and open the game
-        // const service = bluetooth.requestService();
-        // service.then(service => {
-        //   // In case the player canceled the pairing dialog, do nothing
-        //   if (service) {
-        //     canvas.removeEventListener('click', openNextState);
-        //     // Clean up, revert the translation to center to start over
-        //     ctx.restore();
-        //     openingStateDraw(service);
-        //   }
-        // });
         ctx.restore();
-        openingStateDraw();
+        ctx.save();
+        drawConnectButton();
+        ctx.restore();
+        //Request phone permission and open the game
+        const service = bluetooth.requestService();
+        service.then(service => {
+          // In case the player canceled the pairing dialog, do nothing
+          if (service) {
+            canvas.removeEventListener('click', openNextState);
+            // Clean up, revert the translation to center to start over
+            openingStateDraw(service);
+          }
+        });
   }
 }
