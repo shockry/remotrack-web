@@ -123,19 +123,24 @@ function drawScene() {
 }
 
 function enemyCollides() {
+  // Three-way collision detection (top, bottom and front)
+  const enemyLeft = enemy.position.x-(enemy.dimensions.width/2);
+  const playerRight = player.position.x+(player.dimensions.width/2);
+  const enemyBottom = enemy.position.y+(enemy.dimensions.height-enemy.size);
+  const playerTop = player.position.y-player.size;
+  const playerBottom = player.position.y+(player.dimensions.height-player.size);
+  const enemyTop = enemy.position.y-enemy.size;
   return (
-          enemy.position.x-(enemy.dimensions.width/2) <=
-          player.position.x+(player.dimensions.width/2) && (
-          (enemy.position.y+(enemy.dimensions.height-enemy.size) >=
-          player.position.y-player.size &&
-          enemy.position.y+(enemy.dimensions.height-enemy.size) <=
-          player.position.y+(player.dimensions.height-player.size)
-        ) || (
-          (player.position.y+(player.dimensions.height-player.size) >=
-          enemy.position.y-enemy.size &&
-          player.position.y+(player.dimensions.height-player.size) <=
-          enemy.position.y+(enemy.dimensions.height-enemy.size))
+          enemyLeft <= playerRight &&
+          (
+            (
+              enemyBottom >= playerTop &&
+              enemyBottom <= playerBottom
+            ) ||
+            (
+              playerBottom >= enemyTop &&
+              playerBottom <= enemyBottom
+            )
           )
-        )
-        );
+         );
 }
