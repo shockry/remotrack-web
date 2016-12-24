@@ -1,14 +1,12 @@
 'use strict';
 
 import bluetooth from './bluetooth';
-import spaceshipGame from './spaceship';
+import {draw as openingStateDraw} from './spaceship';
 
 export const canvas = document.getElementById('game');
 export const ctx = canvas.getContext('2d');
-
 export let center;
 let buttonSize;
-const openingState = spaceshipGame;
 
 export function draw() {
   center = {x: canvas.width/2, y: canvas.height/2};
@@ -67,7 +65,7 @@ function openNextState(e) {
             canvas.removeEventListener('click', openNextState);
             // Clean up, revert the translation to center to start over
             ctx.restore();
-            openingState.draw(service);
+            openingStateDraw(service);
           }
         });
   }

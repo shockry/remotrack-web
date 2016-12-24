@@ -3,8 +3,7 @@
 import {center, ctx, canvas} from './init';
 
 let tiltAngle;
-
-function draw(service) {
+export function draw(service) {
   //Get tilting characteristic, draw the game and listen to changes in angle
   service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b')
   .then(characteristic => {
@@ -27,37 +26,15 @@ function updateAgle() {
 
 function drawScene() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //ctx.save();
-  //ctx.translate(center.x, center.y);
 
+  // Blue background
   ctx.fillStyle = "rgb(0,204,255)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.save();
+
   spaceShip.draw();
 
-
-
-
-  // ctx.globalCompositeOperation = 'destination-over';
-  // ctx.clearRect(0,0,300,300); // clear canvas
-  // ctx.fillStyle = "rgb(0, 100, 200)";
-  // ctx.save();
-  // ctx.translate(init.center.x, init.center.y);
-  // // if ((count) > 0.08726646259971647) {
-  // //   direction += 1;
-  // // } else if ((count) < -0.08726646259971647) {
-  // //   direction += -1;
-  // // }
-  // //Different axes
-  // ctx.rotate(tiltAngle);
-  // // playerPos += count;
-  // ctx.fillRect (-25, -25, 50, 50);
-  // ctx.restore();
-  // ctx.fillRect(pos--, 0, 20, size);
-  // if (pos < 0) {
-  //   pos = canvas.width+10;
-  //   size = Math.floor(Math.random() * (80)) + 20
-  // }
+  poleThingy.draw(false);
 
   window.requestAnimationFrame(drawScene);
 }
@@ -85,6 +62,23 @@ const spaceShip = {
   }
 };
 
-export default {
-  draw,
-}
+const poleThingy = {
+  positionX: 0,
+  velocity: -2,
+  size: {width: 20, height: 50},
+  draw(sky=true) {
+    if (sky === true) {
+      ctx.fillRect(this.positionX+=this.velocity, 0,
+                   this.size.width, this.size.height);
+      if (this.positionX < 0) {
+        this.positionX = canvas.width+20;
+      }
+    } else {
+      ctx.fillRect(this.positionX+=this.velocity, canvas.height-this.size.height,
+                   this.size.width, this.size.height);
+      if (this.positionX < 0) {
+        this.positionX = canvas.width+20;
+      }
+    }
+  },
+};
