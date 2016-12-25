@@ -2,6 +2,7 @@
 
 import {center, ctx, canvas} from './init';
 
+let tiltAngle=0, player, enemy, score=0;
 
 class SpaceShip {
   constructor(size, position, colors) {
@@ -32,6 +33,21 @@ class SpaceShip {
     ctx.lineTo(this.position.x-this.size, this.position.y);
     ctx.fill();
 
+    ctx.restore();
+  }
+}
+
+class PlayerShip extends SpaceShip {
+  constructor(size, position, translation, colors) {
+    super(size, position, colors);
+    this.translation = translation;
+  }
+
+  draw() {
+    ctx.save();
+    ctx.translate(this.translation.x, this.translation.y);
+    ctx.rotate(tiltAngle);
+    super.draw();
     ctx.restore();
   }
 }
@@ -75,21 +91,20 @@ class EnemyShip extends SpaceShip {
   }
 }
 
-let tiltAngle, player, enemy, score=0;
 
 export function draw(service) {
-  player = new SpaceShip(40, {x: 90, y:center.y}, {
+  player = new PlayerShip(40, {x: 0, y: 0}, {x: 90, y:center.y}, {
                                main: "rgb(0, 100, 200)",
                                middle: "rgb(0, 20, 200)",
                                bottom: "rgb(0, 50, 200)"
                              });
 
-  enemy = new EnemyShip(30, {x: canvas.width, y: center.y+30}, 5, {
+  enemy = new EnemyShip(30, {x: canvas.width, y: center.y+100}, 5, {
                                main: "rgb(200, 100, 0)",
                                middle: "rgb(200, 20, 0)",
                                bottom: "rgb(200, 50, 0)"
                              });
-  //Get tilting characteristic, draw the game and listen to changes in angle
+  // Get tilting characteristic, draw the game and listen to changes in angle
   service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b')
   .then(characteristic => {
     const tiltChar = characteristic;
@@ -101,7 +116,6 @@ export function draw(service) {
   })
   .catch(error => { console.log(error); });
 
-  // drawScene();
 }
 
 
@@ -164,9 +178,9 @@ function enemyCollides() {
   const enemyBottom = enemy.position.y+(enemy.dimensions.height-enemy.size);
   const enemyTop = enemy.position.y-enemy.size;
 
-  const playerRight = player.position.x+(player.dimensions.width/2);
-  const playerBottom = player.position.y+(player.dimensions.height-player.size);
-  const playerTop = player.position.y-player.size;
+  const playerRight = player.translation.x+(player.dimensions.width/2);
+  const playerBottom = player.translation.y+(player.dimensions.height-player.size);
+  const playerTop = player.translation.y-player.size;
 
   const bulletLeft = enemy.bulletPosition.x - enemy.bulletSize;
   const bulletBottom = enemy.bulletPosition.y + enemy.bulletSize;
