@@ -38,14 +38,22 @@ class SpaceShip {
 }
 
 class PlayerShip extends SpaceShip {
-  constructor(size, position, translation, colors) {
+  constructor(size, position, translation, speed, colors) {
     super(size, position, colors);
     this.translation = translation;
+    // this.movingDirection = this.translation.y;
+    this.speed = speed;
   }
 
   draw() {
     ctx.save();
     ctx.translate(this.translation.x, this.translation.y);
+    // If rotated 5 degrees to either directions, start moving
+    if (tiltAngle > 0.08726646259971647) {
+      this.translation.y += this.speed;
+    } else if (tiltAngle < -0.08726646259971647) {
+      this.translation.y -= this.speed;
+    }
     ctx.rotate(tiltAngle);
     super.draw();
     ctx.restore();
@@ -93,7 +101,7 @@ class EnemyShip extends SpaceShip {
 
 
 export function draw(service) {
-  player = new PlayerShip(40, {x: 0, y: 0}, {x: 90, y:center.y}, {
+  player = new PlayerShip(40, {x: 0, y: 0}, {x: 90, y:center.y}, 3, {
                                main: "rgb(0, 100, 200)",
                                middle: "rgb(0, 20, 200)",
                                bottom: "rgb(0, 50, 200)"
@@ -119,9 +127,9 @@ export function draw(service) {
 }
 
 
-function updateAgle() {
-  tiltAngle = event.target.value.getFloat64(0, true);
-  console.log(tiltAngle);
+function updateAgle(e) {
+  tiltAngle = e.target.value.getFloat64(0, true);
+  // console.log(tiltAngle);
 }
 
 
@@ -199,7 +207,7 @@ function enemyCollides() {
                 playerBottom <= enemyBottom
               )
             )
-          ) || // Check for bullet collision
+          ) //|| // Check for bullet collision
           (
             bulletLeft <= playerRight &&
             (

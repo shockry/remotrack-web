@@ -89,10 +89,15 @@ function openNextState(e) {
         service.then(service => {
           // In case the player canceled the pairing dialog, do nothing
           if (service) {
-            canvas.removeEventListener('click', openNextState);
+            clearEventListeners();
             // Clean up, revert the translation to center to start over
             openingStateDraw(service);
           }
         });
   }
+}
+
+function clearEventListeners() {
+  canvas.removeEventListener('mousedown', animateButton);
+  canvas.removeEventListener('mouseup', openNextState);
 }
