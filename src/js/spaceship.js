@@ -2,7 +2,7 @@
 
 import {center, ctx, canvas} from './init';
 
-let tiltAngle=0, player, enemy, score=0;
+let tiltAngle=0, player, enemy, score=0, actionButtonDown=0;
 
 class SpaceShip {
   constructor(size, position, colors) {
@@ -41,18 +41,20 @@ class PlayerShip extends SpaceShip {
   constructor(size, position, translation, speed, colors) {
     super(size, position, colors);
     this.translation = translation;
-    // this.movingDirection = this.translation.y;
     this.speed = speed;
   }
 
   draw() {
     ctx.save();
     ctx.translate(this.translation.x, this.translation.y);
-    // If rotated 5 degrees to either directions, start moving
-    if (tiltAngle > 0.08726646259971647) {
-      this.translation.y += this.speed;
-    } else if (tiltAngle < -0.08726646259971647) {
-      this.translation.y -= this.speed;
+    // If remote button is down, move
+    if (actionButtonDown === 1) {
+      // If rotated 5 degrees to either directions, start moving
+      if (tiltAngle > 0.08726646259971647) {
+        this.translation.y += this.speed;
+      } else if (tiltAngle < -0.08726646259971647) {
+        this.translation.y -= this.speed;
+      }
     }
     ctx.rotate(tiltAngle);
     super.draw();
@@ -129,7 +131,7 @@ export function draw(service) {
 
 function updateAgle(e) {
   tiltAngle = e.target.value.getFloat64(0, true);
-  // console.log(tiltAngle);
+  actionButtonDown = e.target.value.getUint8(8);
 }
 
 
@@ -207,7 +209,7 @@ function enemyCollides() {
                 playerBottom <= enemyBottom
               )
             )
-          ) //|| // Check for bullet collision
+          ) || // Check for bullet collision
           (
             bulletLeft <= playerRight &&
             (
