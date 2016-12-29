@@ -2,7 +2,8 @@
 
 import {center, ctx, canvas} from './init';
 
-let tiltAngle=0, player, enemy, score=0, actionButtonDown=0;
+let tiltAngle=0, player, enemy, score=0, actionButtonDown=0, bestScore=0;
+let bestScoreCharacteristic;
 
 class SpaceShip {
   constructor(size, position, colors) {
@@ -115,7 +116,17 @@ export function draw(service) {
                                bottom: "rgb(200, 50, 0)"
                              });
   // Get tilting characteristic, draw the game and listen to changes in angle
-  service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b')
+  // Get the best score characteristic
+  service.getCharacteristic('cb6eede9-6aa5-4253-8629-31c53bc246cd')
+  .then(characteristic => {
+    bestScoreCharacteristic = characteristic;
+    return characteristic.readValue();
+  })
+  .then(score => {
+    let lastBest = score.getUint32(0, true);
+    bestScore = lastBest
+  })
+  .then (_ => service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b'))
   .then(characteristic => {
     const tiltChar = characteristic;
     return characteristic.startNotifications().then(_ => {
@@ -158,12 +169,18 @@ function drawScene() {
 
   player.draw();
   enemy.draw();
+
   if (!enemyCollides()) {
     window.requestAnimationFrame(drawScene);
   } else {
-    drawLoss();
+    if (score > bestScore) {
+      bestScore = score;
+    }
+    drawLoss()
+    sendScoreToRmote()
   }
 }
+
 
 function drawLoss() {
   ctx.save();
@@ -175,9 +192,12 @@ function drawLoss() {
   ctx.shadowBlur = 5;
   ctx.shadowColor = "rgb(46, 47, 48)";
   ctx.font = "40px Helvetica";
-  const lossText = `You scored \n ${score}`;
-  const textProps = ctx.measureText(lossText);
-  ctx.fillText(lossText, center.x-(textProps.width/2), center.y);
+  const lossText = `You Scored  ${score}`;
+  const bestScoreText = `Your Best is  ${bestScore}`;
+  const lossTextProps = ctx.measureText(lossText);
+  const bestScoreTextProps = ctx.measureText(bestScoreText);
+  ctx.fillText(lossText, center.x-(lossTextProps.width/2), center.y-40);
+  ctx.fillText(bestScoreText, center.x-(bestScoreTextProps.width/2), center.y+20);
 
   ctx.restore();
 }
@@ -224,4 +244,13 @@ function enemyCollides() {
             )
           )
          );
+}
+
+
+function sendScoreToRmote() {
+  const currentScore =  new Uint32Array([score]);
+  bestScoreCharacteristic.writeValue(currentScore)
+  .then(_ => {
+    return true;
+  })
 }
