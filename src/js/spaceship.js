@@ -231,22 +231,24 @@ function drawLoss() {
 
 
 function enemyCollides() {
-  // Three-way collision detection (top, bottom and front)
-  const enemyLeft = enemy.position.x-(enemy.dimensions.width/2);
-  const enemyBottom = enemy.position.y+(enemy.dimensions.height-enemy.size);
-  const enemyTop = enemy.position.y-enemy.size;
+  const enemyLeft = enemy.position.x - (enemy.dimensions.width/2);
+  const enemyRight = enemy.position.x + (enemy.dimensions.width/2);
+  const enemyBottom = enemy.position.y + (enemy.dimensions.height-enemy.size);
+  const enemyTop = enemy.position.y - enemy.size;
 
-  const playerRight = player.translation.x+(player.dimensions.width/2);
-  const playerBottom = player.translation.y+(player.dimensions.height-player.size);
-  const playerTop = player.translation.y-player.size;
+  const playerLeft = player.translation.x - (player.dimensions.width/2);
+  const playerRight = player.translation.x + (player.dimensions.width/2);
+  const playerBottom = player.translation.y + ( player.dimensions.height-player.size);
+  const playerTop = player.translation.y - player.size;
 
   const bulletLeft = enemy.bulletPosition.x - enemy.bulletSize;
+  const bulletRight = enemy.bulletPosition.x + enemy.bulletSize;
   const bulletBottom = enemy.bulletPosition.y + enemy.bulletSize;
   const bulletTop = enemy.bulletPosition.y - enemy.bulletSize;
 
   return (
           ( // Check for enemy ship collision
-            enemyLeft <= playerRight &&
+            (enemyLeft <= playerRight && enemyRight >= playerLeft) &&
             (
               (
                 enemyBottom >= playerTop &&
@@ -259,7 +261,7 @@ function enemyCollides() {
             )
           ) || // Check for bullet collision
           (
-            bulletLeft <= playerRight &&
+            (bulletLeft <= playerRight && bulletRight >= playerLeft) &&
             (
               (
                 bulletBottom >= playerTop &&
