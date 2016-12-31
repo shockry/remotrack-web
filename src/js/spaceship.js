@@ -2,8 +2,9 @@
 
 import {center, ctx, canvas} from './init';
 
-let tiltAngle=0, player, enemy, score=0, actionButtonDown=0, bestScore=0;
-let bestScoreCharacteristic;
+let tiltAngle, player, enemy, score, actionButtonDown, bestScore=0;
+// Guard against garbage collection
+let bestScoreCharacteristic, replayButtonCharacteristic, tiltCharacteristic;
 
 class SpaceShip {
   constructor(size, position, colors) {
@@ -103,7 +104,23 @@ class EnemyShip extends SpaceShip {
 }
 
 
-export function draw(service) {
+export function draw(service, forReplay=false) {
+  initializeGlobals();
+
+  // Do not re-subscribe to characteristics if we are just replaying
+  if (forReplay) {
+    drawScene();
+  } else {
+    subscribeToCharacteristics(service);
+  }
+}
+
+
+function initializeGlobals() {
+  tiltAngle = 0;
+  score = 0;
+  actionButtonDown = 0;
+
   player = new PlayerShip(40, {x: 0, y: 0}, {x: 90, y:center.y}, 3, {
                                main: "rgb(0, 100, 200)",
                                middle: "rgb(0, 20, 200)",
@@ -115,8 +132,11 @@ export function draw(service) {
                                middle: "rgb(200, 20, 0)",
                                bottom: "rgb(200, 50, 0)"
                              });
-  // Get tilting characteristic, draw the game and listen to changes in angle
-  // Get the best score characteristic
+}
+
+
+function subscribeToCharacteristics(service) {
+  // Best score characteristic
   service.getCharacteristic('cb6eede9-6aa5-4253-8629-31c53bc246cd')
   .then(characteristic => {
     bestScoreCharacteristic = characteristic;
@@ -126,23 +146,30 @@ export function draw(service) {
     let lastBest = score.getUint32(0, true);
     bestScore = lastBest
   })
+  // Get Replay button pressed notifications
+  .then(_ => service.getCharacteristic('941e4433-fae2-4ef4-aeec-3866ff4c4bf3'))
+  .then(characteristic => {
+    replayButtonCharacteristic = characteristic;
+    return characteristic.startNotifications().then(_ => {
+      replayButtonCharacteristic.addEventListener('characteristicvaluechanged', replay);
+    });
+  })
+  // Get tilting characteristic, draw the game and listen to changes in angle
   .then (_ => service.getCharacteristic('fd0a7b0b-629f-4179-b2dc-7ef53bd4fe8b'))
   .then(characteristic => {
-    const tiltChar = characteristic;
+    tiltCharacteristic = characteristic;
     return characteristic.startNotifications().then(_ => {
-      tiltChar.addEventListener('characteristicvaluechanged',
-                                      updateAgle);
+      tiltCharacteristic.addEventListener('characteristicvaluechanged', updateAngle);
       drawScene();
     });
   })
   .catch(error => { console.log(error); });
-
 }
 
 
-function updateAgle(e) {
-  tiltAngle = e.target.value.getFloat64(0, true);
-  actionButtonDown = e.target.value.getUint8(8);
+function updateAngle(e) {
+  actionButtonDown = e.target.value.getUint8(0);
+  tiltAngle = e.target.value.getFloat64(1, true);
 }
 
 
@@ -202,6 +229,7 @@ function drawLoss() {
   ctx.restore();
 }
 
+
 function enemyCollides() {
   // Three-way collision detection (top, bottom and front)
   const enemyLeft = enemy.position.x-(enemy.dimensions.width/2);
@@ -253,4 +281,12 @@ function sendScoreToRmote() {
   .then(_ => {
     return true;
   })
+}
+
+
+function replay(e) {
+  const val = e.target.value.getUint8(0);
+  if (val === 1) {
+    draw(null, true);
+  }
 }

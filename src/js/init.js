@@ -1,6 +1,6 @@
 'use strict';
 
-import bluetooth from './bluetooth';
+import {requestService} from './bluetooth';
 import {draw as openingStateDraw} from './spaceship';
 
 export const canvas = document.getElementById('game');
@@ -85,8 +85,8 @@ function openNextState(e) {
         drawConnectButton();
         ctx.restore();
         //Request phone permission and open the game
-        const service = bluetooth.requestService();
-        service.then(service => {
+        const serviceRequest = requestService();
+        serviceRequest.then(service => {
           // In case the player canceled the pairing dialog, do nothing
           if (service) {
             clearEventListeners();
