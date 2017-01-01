@@ -53,9 +53,9 @@ class PlayerShip extends SpaceShip {
     if (actionButtonDown === 1) {
       // If rotated 5 degrees to either directions, start moving
       if (tiltAngle > 0.08726646259971647) {
-        this.translation.y += this.speed;
+        this.translation.y += this.speed*tiltAngle;
       } else if (tiltAngle < -0.08726646259971647) {
-        this.translation.y -= this.speed;
+        this.translation.y += this.speed*tiltAngle;
       }
     }
     ctx.rotate(tiltAngle);
