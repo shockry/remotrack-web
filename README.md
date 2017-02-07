@@ -25,6 +25,10 @@ Otherwise if you are uing Chrome 55 on any of the three platforms (or Chrome 56 
 `chrome://flags/#enable-experimental-web-platform-features`
 enable the highlighted flag, and restart Chrome.
 
+Clone this repo, and inside the project's root directory, run these in the terminal:
+
+`npm install` then `npm run bundle`
+
 You will also need a simple server to run it locally, you can use Python's little SimpleHTTPServer, run this from the project's root directory:
 
 `python -m SimpleHTTPServer 8000`
